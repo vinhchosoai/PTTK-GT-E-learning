@@ -21,7 +21,7 @@ private:
             L[i] = num[l+i];
         }
         
-        for(int i = 0 ; i < n1;i++){
+        for(int i = 0 ; i < n2;i++){
             R[i] = num[m+1+i];
         }
 
@@ -377,9 +377,9 @@ public:
     }
 };
 int main(){
-    Cau_8 sol;
+    Cau_1 sol;
 
-    sol.solve({3, 2, 1, 5, 6, 4},2);
+    sol.solve({3, 2, 1, 5, 6, 4});
 
     return 0;
 }
