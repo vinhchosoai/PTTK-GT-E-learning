@@ -377,7 +377,7 @@ public:
     }
 };
 int main(){
-    Cau_1 sol;
+    Cau_2 sol;
 
     sol.solve({3, 2, 1, 5, 6, 4});
 
