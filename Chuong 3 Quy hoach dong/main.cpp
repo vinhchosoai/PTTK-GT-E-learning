@@ -51,7 +51,12 @@ class Cau_2{
 private:
     int MaxSum(vector<int> nums){
         vector<int> dp (nums.size()+1);
-        
+        if (nums.size() == 0) {
+            return 0; 
+        }
+        if (nums.size() == 1) {
+            return nums[0]; 
+        }
         dp[0]= nums[0];
         dp[1] =max(nums[0],nums[1]);
         for(int i = 2;  i < nums.size(); i++){
@@ -78,9 +83,9 @@ private:
         dp[i][0] = 1;
         }
 
-        for(int i = 1 ;  i< n ; i++){
-            for(int j = 1 ; j< min(i,k);j++){
-                dp[i][j] = dp[i-1][j]+j*dp[i-1][j-1];
+        for(int i = 1 ;  i<= n ; i++){
+            for(int j = 1 ; j<= min(i,k);j++){
+                dp[i][j] = dp[i-1][j] + j * dp[i-1][j-1];
             }
         }
 
@@ -88,8 +93,8 @@ private:
     }
 public:
     void solve(int N, int K){
-        if(K < 0 || K < N){
-            cout<<"Nhap so k khac";
+        if(K < 0 || K > N){
+            return;
         }
         this->n = N;
         this->k = K;
@@ -163,6 +168,31 @@ private:
 
         return dp[n1][n2][n3];
     }
+    string findLCS() {
+        string lcs_str = "";
+        int i = n1, j = n2, k = n3;
+
+        while (i > 0 && j > 0 && k > 0) {
+            if (s1[i - 1] == s2[j - 1] && s2[j - 1] == s3[k - 1]) {
+                lcs_str += s1[i - 1];
+                i--; j--; k--;
+            }
+            else {
+                int max_val = dp[i][j][k];
+
+                if (dp[i - 1][j][k] == max_val) {
+                    i--;
+                } else if (dp[i][j - 1][k] == max_val) {
+                    j--;
+                } else {
+                    k--;
+                }
+            }
+        }
+        
+        reverse(lcs_str.begin(), lcs_str.end());
+        return lcs_str;
+    }
 
 public:
     void solve(string str1, string str2, string str3) {
@@ -181,79 +211,142 @@ public:
 
         dp.resize(n1 + 1, vector<vector<int>>(n2 + 1,vector<int>(n3+1,0)));
 
-        
-        cout << "" << maxLen() << endl;
+        maxLen();
+        cout << "" << findLCS() << endl;
     }
 };
 
 class Cau_6{
     private:
         vector<int> nums;
-        int res = INT_MIN;
-        int cur = INT_MIN;
 
-        int maxSum(){
-            int n =nums.size();
-
-            for(int i = 0 ;  i<n;i++){
-                cur = max(nums[i],cur+nums[i]);
-                res = max(res,cur);
+        void findMaxSubarray(){
+            int n = nums.size();
+            if (n == 0) {
+                return;
             }
-            return res;
+
+            int res = nums[0];
+            int cur = nums[0];
+            
+            int max_start = 0;
+            int max_end = 0;
+            int cur_start = 0;
+
+            for (int i = 1; i < n; i++) {
+                
+                if (nums[i] > cur + nums[i]) {
+                    cur = nums[i];
+                    cur_start = i;
+                } else {
+                    cur = cur + nums[i];
+                }
+
+                if (cur > res) {
+                    res = cur;
+                    max_start = cur_start;
+                    max_end = i;
+                }
+                
+            }
+            for (int i = max_start; i <= max_end; i++) {
+                    cout << nums[i] << " ";
+                }
         }
     public:
     void solve(vector<int> vec){
         this->nums = vec;
         
-        cout<<maxSum();
+        findMaxSubarray();
         
         return;
     }
 };
 
-class Cau_7{
+class Cau_7 {
 private:
     vector<int> pack;
-    long long S1= 0, S2;
+    vector<int> S1_packets;
+    vector<int> S2_packets;
+    long long S1_sum = 0;
+    long long S2_sum = 0;
 
-    void Split(){
-        long long S =0;
-        for(int candy : pack){
+    void Split() {
+        S1_packets.clear();
+        S2_packets.clear();
+        S1_sum = 0;
+        S2_sum = 0;
+
+        long long S = 0;
+        for (int candy : pack) {
             S += candy;
         }
+        long long target = S / 2;
+        int n = pack.size();
 
-        long long target = S/2;
-        vector<bool> dp(target +1,false);
-        dp[0] = true;
+        vector<vector<bool>> dp(n + 1, vector<bool>(target + 1, false));
 
-        for(int candy : pack){
-            for(long long j = target ; j >= candy;j--){
-                if(dp[j - candy])
-                    dp[j] = true;
+        for (int i = 0; i <= n; i++) {
+            dp[i][0] = true;
+        }
+
+        for (int i = 1; i <= n; i++) {
+            int current_candy = pack[i - 1];
+            
+            for (long long j = 1; j <= target; j++) {
+                dp[i][j] = dp[i - 1][j];
+
+                if (j >= current_candy) {
+                    dp[i][j] = dp[i][j] || dp[i - 1][j - current_candy];
+                }
             }
         }
 
-        for(long long j=  target;j >= 0; j--){
-            if(dp[j]){
-                S1=j;
+        for (long long j = target; j >= 0; j--) {
+            if (dp[n][j]) {
+                S1_sum = j;
                 break;
             }
         }
 
-        S2 = S-S1;
+        S2_sum = S - S1_sum;
+
+        long long current_sum = S1_sum;
+        for (int i = n; i > 0; i--) {
+            int current_candy = pack[i - 1];
+
+            if (dp[i - 1][current_sum]) {
+                S2_packets.push_back(current_candy);
+            }
+            else if (current_sum >= current_candy && dp[i - 1][current_sum - current_candy]) {
+                S1_packets.push_back(current_candy);
+                current_sum -= current_candy;
+            }
+            else {
+                S2_packets.push_back(current_candy);
+            }
+        }
     }
+
 public:
-    void solve(vector<int> vec){
+    void solve(vector<int> vec) {
         this->pack = vec;
         Split();
 
-        cout<<"Left : "<<S1<<"\nRight : "<<S2;
+        cout << "Phan 1 : ";
+        for (int p : S1_packets) cout << p << " ";
+        cout << endl;
+
+        cout << "Phan 2 : ";
+        for (int p : S2_packets) cout << p << " ";
+        cout << endl;
+        
     }
 };
 
 int main(){
     Cau_7 sol;
-    sol.solve({2,3,4,15});
+    sol.solve({1,2,3,4,5,15});
 
     return 0;
 
